@@ -1,0 +1,62 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+# importing torch
+import torch
+#Bayes thereom
+education_districtwise = pd.read_csv(r'C:\Users\adira\PycharmProjects\Pandas and Machine Learning 2024\education-in-india\2015_16_Districtwise.csv')
+
+print(education_districtwise['OVERALL_LI'].describe())
+
+#Added in MatPlotLib ENV
+# Using Series makes a linear stored set called a series and
+#if u add in the parameters (a,index = 'Name of label') U add a label
+
+#Data file extracted from csv file
+dataFile = pd.read_csv('ds_salaries.csv')
+
+#Whole Data
+DataSortedIntoTable = pd.DataFrame(dataFile)
+
+###########################################################################
+#  |SALARY DATA represented using pie chart|
+
+DataForSalaries = DataSortedIntoTable.loc[:,'salary']
+highPay = []
+midPay = []
+lowPay = []
+for values in (list(DataForSalaries)):
+
+    if int(values) >=100000:
+        highPay.append(int(values))
+    elif int(values) <100000 and int(values) >=50000:
+        midPay.append(int(values))
+    else:
+        lowPay.append(int(values))
+
+print(len(highPay),len(midPay),len(lowPay))
+
+averageHighPay = len(highPay)
+averageMidPay =  len(midPay)
+averageLowPay =  len(lowPay)
+
+data = np.array([averageHighPay,averageMidPay,averageLowPay])
+
+
+payLevel = ['High Pay jobs over 100k', 'Medium Pay jobs under 100k and over 50k', 'Low Pay jobs under 50k']
+# Creating plot
+fig = plt.figure(figsize=(10, 7))
+
+def absolute_value(val):
+    a  = np.round(val/100*data.sum(), 0)
+
+    return round(a/data.sum()*100,1)
+
+plt.pie(data, labels=payLevel, autopct=absolute_value, shadow=True)
+
+plt.axis('equal')
+
+# show plot
+plt.show()
+###################################################################################"""
+
