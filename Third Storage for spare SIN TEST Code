@@ -1,0 +1,118 @@
+import os
+import magic
+import stat
+from pypdf import PdfReader
+
+
+
+def change_file_permissions(filepath):
+    try:
+        # Change the file permission to allow read access (rwx for owner)
+        os.chmod(filepath, stat.S_IRWXU)
+
+    except Exception as e:
+        print(f"Failed to change permissions for {filepath}: {e}")
+
+
+from luhn import *
+def checkForSin(listOfCharachters, possibleReturn):
+    acceptedChar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '-', '_', ',', '/', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    accepteNum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+
+    if len(listOfCharachters) >= 9:
+        for values in listOfCharachters:
+            if values in acceptedChar:
+                possibleReturn.append(values)
+                if len(possibleReturn) == 9:
+                    allowed = 0
+                    returnValue = ''
+                    for values in possibleReturn:
+                        if values in accepteNum:
+                            allowed += 1
+                            returnValue += str(values)
+                    if allowed == 9:
+
+                        return verify(returnValue)
+            else:
+                possibleReturn = []
+                print(f'This is a possible return:{possibleReturn}')
+
+    return 'No SIN found'
+
+
+
+
+
+
+
+def list_files_in_directory(directory):
+    # List to store file names and their full paths
+    file_paths = []
+
+    # Walk through all directories and files within the given directory
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            # Full path of the file
+            full_path = os.path.join(dirpath, filename)
+            try:
+                # Use magic to detect the file type
+                file_type = magic.from_file(full_path)
+                fileTypeSpesific = file_type.split(',')
+
+                #-----------
+                if fileTypeSpesific[0].strip() == "PDF document":
+                    print(f"\nProcessing PDF: {full_path}")
+                    print(f"File Type: {fileTypeSpesific[0]}")
+                    reader = PdfReader(full_path)  # Pass the full path of the file here
+                    # Print the number of pages in the PDF
+                    print(f"Number of pages: {len(reader.pages)}")
+                    # Get the first page from the PDF file
+                    numOfNum = 0
+
+                    if len(reader.pages) != 0:
+                        page = reader.pages[0]
+                        # Extract text from the first page
+                        text = page.extract_text()
+                        charachterString = str(text).split()
+                        setOfValaues = []
+                        setOfSin = []
+                        acceptedStringNum = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+                        acceptedNum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+                        for values in charachterString:
+                            for charachters in values:
+                                setOfValaues.append(charachters)
+
+                                if charachters in acceptedStringNum or charachters in acceptedNum:
+                                    numOfNum +=1
+                        print(f"Number of numbers in the file: {numOfNum}")
+
+                        if numOfNum >= 9:
+                            print(checkForSin(setOfValaues, setOfSin))
+                        else:
+                            print("No SIN Found")
+
+
+                    else:
+                        print(f"PDF is empty: {full_path}")
+
+                #--------------
+
+            except PermissionError:
+                change_file_permissions(full_path)
+                try:
+                    # Retry reading file type after changing permissions
+                    file_type = magic.from_file(full_path)
+                    file_paths.append(full_path)
+                except Exception as e:
+                    print(f"Failed to process {full_path} even after changing permissions: {e}")
+            except Exception as e:
+                # Handle other exceptions (e.g., file not found)
+                print('')
+
+
+
+# Input: specify the directory you want to scan
+directory = input("Enter the directory path: ")
+
+# Get the list of file paths
+files = list_files_in_directory(directory)

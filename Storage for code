@@ -1,0 +1,50 @@
+import os
+import magic
+import stat
+import pypdf
+from pypdf import PdfReader
+
+
+
+def change_file_permissions(filepath):
+    try:
+        # Change the file permission to allow read access (rwx for owner)
+        os.chmod(filepath, stat.S_IRWXU)
+
+    except Exception as e:
+        print(f"Failed to change permissions for {filepath}: {e}")
+
+
+def list_files_in_directory(directory):
+    # List to store file names and their full paths
+    file_paths = []
+
+    # Walk through all directories and files within the given directory
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            # Full path of the file
+            full_path = os.path.join(dirpath, filename)
+            try:
+                # Use magic to detect the file type
+                file_type = magic.from_file(full_path)
+                fileTypeSpesific = file_type.split(',')
+                print(fileTypeSpesific[0])
+
+            except PermissionError:
+                change_file_permissions(full_path)
+                try:
+                    # Retry reading file type after changing permissions
+                    file_type = magic.from_file(full_path)
+                    file_paths.append(full_path)
+                except Exception as e:
+                    print(f"Failed to process {full_path} even after changing permissions: {e}")
+            except Exception as e:
+                # Handle other exceptions (e.g., file not found)
+                print(f"Error processing {full_path}: {e}")
+
+
+# Input: specify the directory you want to scan
+directory = input("Enter the directory path: ")
+
+# Get the list of file paths
+files = list_files_in_directory(directory)
